@@ -1,19 +1,15 @@
 """
 park_data.py
 
-Hardcoded databases for:
-1) Park language profiles (terms + noun chunks)
-2) Park -> biome tags
+Hardcoded databases with:
+1) Park Biome Tags
+2) Park language profiles (terms + noun chunks)
 3) Biome language profiles (terms + noun chunks)
 
-This file is intentionally "data-first" so you can iterate on lists without
-touching matching logic.
-
 Notes:
-- Keep items lowercase.
+- Items lowercase.
 - Terms should be single words (no spaces).
 - Chunks should be multi-word phrases (contain spaces).
-- You can start small and expand over time.
 """
 
 from __future__ import annotations
@@ -21,7 +17,7 @@ from __future__ import annotations
 from typing import Dict, List, Set, Tuple
 
 # -----------------------------
-# Canonical park list (9 CA NPs)
+# California National Parks
 # -----------------------------
 PARKS: Tuple[str, ...] = (
     "Channel Islands",
@@ -36,7 +32,7 @@ PARKS: Tuple[str, ...] = (
 )
 
 # -----------------------------
-# Biome taxonomy (your updated list)
+# Biome Tags
 # -----------------------------
 BIOMES: Tuple[str, ...] = (
     "Marine_Costal",
@@ -49,7 +45,7 @@ BIOMES: Tuple[str, ...] = (
 )
 
 # --------------------------------------
-# Park -> biomes (your updated mapping)
+# Park Biomes
 # --------------------------------------
 PARK_BIOMES: Dict[str, List[str]] = {
     "Channel Islands": ["Marine_Costal"],
@@ -65,12 +61,6 @@ PARK_BIOMES: Dict[str, List[str]] = {
 
 # ============================================================
 # 1) PARK LANGUAGE DATABASE
-# ============================================================
-# Each park has:
-# - "terms": single-word NOUN/PROPN/ADJ/VERB-like terms (no stopwords)
-# - "chunks": multi-word noun chunks / phrases (2+ words)
-#
-# Keep these lists curated and expandable. Start modest, then add more as you test.
 # ============================================================
 
 PARK_TERMS: Dict[str, List[str]] = {
@@ -392,10 +382,7 @@ PARK_CHUNKS: Dict[str, List[str]] = {
 }
 
 # ============================================================
-# 2) BIOME LANGUAGE DATABASE (for Option B biome prototypes)
-# ============================================================
-# These are NOT parks — they're biome concepts used to infer the poem's biome
-# using embedding similarity.
+# 2) BIOME LANGUAGE DATABASE
 # ============================================================
 
 BIOME_TERMS: Dict[str, List[str]] = {
@@ -571,50 +558,3 @@ BIOME_CHUNKS: Dict[str, List[str]] = {
         "thermal basin",
     ],
 }
-
-# ============================================================
-# Basic integrity checks (optional but helpful during dev)
-# ============================================================
-
-def validate_databases() -> None:
-    """Raise ValueError if the hardcoded data has obvious issues."""
-    # Parks present
-    for park in PARKS:
-        if park not in PARK_TERMS:
-            raise ValueError(f"Missing PARK_TERMS for park: {park}")
-        if park not in PARK_CHUNKS:
-            raise ValueError(f"Missing PARK_CHUNKS for park: {park}")
-        if park not in PARK_BIOMES:
-            raise ValueError(f"Missing PARK_BIOMES for park: {park}")
-
-    # Biomes present
-    for biome in BIOMES:
-        if biome not in BIOME_TERMS:
-            raise ValueError(f"Missing BIOME_TERMS for biome: {biome}")
-        if biome not in BIOME_CHUNKS:
-            raise ValueError(f"Missing BIOME_CHUNKS for biome: {biome}")
-
-    # Park biomes must be valid
-    biome_set: Set[str] = set(BIOMES)
-    for park, tags in PARK_BIOMES.items():
-        for tag in tags:
-            if tag not in biome_set:
-                raise ValueError(f"Unknown biome tag '{tag}' in PARK_BIOMES for park '{park}'")
-
-    # Basic lowercase enforcement
-    def _check_lower(items: List[str], label: str) -> None:
-        for s in items:
-            if s != s.lower():
-                raise ValueError(f"{label} item not lowercase: '{s}'")
-
-    for park in PARKS:
-        _check_lower(PARK_TERMS[park], f"PARK_TERMS[{park}]")
-        _check_lower(PARK_CHUNKS[park], f"PARK_CHUNKS[{park}]")
-
-    for biome in BIOMES:
-        _check_lower(BIOME_TERMS[biome], f"BIOME_TERMS[{biome}]")
-        _check_lower(BIOME_CHUNKS[biome], f"BIOME_CHUNKS[{biome}]")
-
-
-# Run validations during import in dev (comment out if you prefer)
-validate_databases()
