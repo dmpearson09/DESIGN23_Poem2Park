@@ -2,13 +2,10 @@
 src/app.py
 
 FastAPI backend for Poem2Park.
-
-Responsibilities:
-- Serve the static frontend from "/" (static/index.html)
-- Serve images from "/images/..." (static/images/...)
-- Provide JSON API:
-    POST /match  -> best park, ranked parks, top biomes, explanations, image_url
-    GET  /health -> basic liveness check
+- Serves the frontend from / (static/index.html)
+- Serves images from /images/... (static/images/...)
+- Exposes POST /match which returns:
+    best_park, ranked_parks, biomes, explanations, biome_explanations, image_url
 """
 
 from __future__ import annotations
@@ -22,7 +19,7 @@ from .match import ParkMatcher
 
 app = FastAPI(title="Poem2Park")
 
-# Park name -> image URL (served from static/images/)
+# Park Image Path
 PARK_IMAGE: Dict[str, str] = {
     "Channel Islands": "/images/channel-island.jpg",
     "Death Valley": "/images/death-valley.jpg",
@@ -35,8 +32,7 @@ PARK_IMAGE: Dict[str, str] = {
     "Yosemite": "/images/yosemite.jpg",
 }
 
-# Build matcher once at startup (precomputes park + biome vectors).
-# All tuning defaults should live in match.py now.
+# Build matcher once at startup. All tuning defaults live in match.py.
 matcher = ParkMatcher()
 
 
@@ -47,39 +43,52 @@ def health() -> Dict[str, str]:
 
 @app.post("/match")
 def match_poem(payload: Dict[str, Any]) -> Dict[str, Any]:
-    # Read poem from request JSON
     poem = str(payload.get("poem", "")).strip()
     if not poem:
         return {"error": "Missing 'poem' text"}
 
-    # Run matching
     result = matcher.match(poem)
 
-    # Convert explanation dataclasses -> JSON-friendly dicts
+    # Top Park explanations (JSON)
     explanations: Dict[str, Any] = {}
-    for park, contribs in result.explanations.items():
-        explanations[park] = [
+    if result.explanations:
+        best_park = next(iter(result.explanations.keys()))
+        contribs = result.explanations[best_park]
+        explanations[best_park] = [
             {
                 "poem_unit": c.poem_unit,
                 "poem_unit_type": c.poem_unit_type,
                 "matched_park_unit": c.matched_park_unit,
                 "similarity": float(c.similarity),
-                "gated_vote": float(c.gated_vote),
+                "vote": float(c.vote),
             }
             for c in contribs
         ]
 
-    # Keep response shaped exactly how your frontend expects
+    # Top Biome explanations (JSON)
+    biome_explanations: Dict[str, Any] = {}
+    if result.biome_explanations:
+        top_biome = next(iter(result.biome_explanations.keys()))
+        contribs = result.biome_explanations[top_biome]
+        biome_explanations[top_biome] = [
+            {
+                "poem_unit": c.poem_unit,
+                "poem_unit_type": c.poem_unit_type,
+                "matched_biome_unit": c.matched_biome_unit,
+                "similarity": float(c.similarity),
+            }
+            for c in contribs
+        ]
+
     return {
         "best_park": result.best_park,
-        "ranked_parks": result.ranked_parks[:3],
-        "biomes": result.biome_scores[:3],
+        "ranked_parks": result.ranked_parks,
+        "biomes": result.biome_scores,
         "explanations": explanations,
+        "biome_explanations": biome_explanations,
         "image_url": PARK_IMAGE.get(result.best_park, ""),
     }
 
 
-# Serve the website + images from the "static" folder at repo root.
-# "/" -> static/index.html
-# "/images/..." -> static/images/...
+# Serve site + images from the "static" folder at project root.
 app.mount("/", StaticFiles(directory="static", html=True), name="static")

@@ -1,10 +1,14 @@
 """
 main.py
 
-Terminal-based entry point for Poem2Park.
+Terminal Based Run for Poem2Park.
 
-Run from project root:
-  python -m src.main
+Returns
+  - Best Match 
+  - Top parks
+  - Top Biomes
+  - Word Connections (Best Park)
+  - Word Connections (Best Biome)
 
 Paste a poem (multi-line supported), then press ENTER twice.
 """
@@ -38,37 +42,53 @@ def read_poem_from_terminal() -> str:
 
 def print_results(result) -> None:
     print("\n==============================")
-    print("        Poem2Park Result      ")
+    print("          Poem2Park")
     print("==============================\n")
 
-    print(f"🏞  Best match: {result.best_park}\n")
+    print(f"Best Match:\n1. {result.best_park}\n")
 
-    print("Top parks:")
-    for i, (park, score) in enumerate(result.ranked_parks[:3], start=1):
-        print(f"  {i}. {park:15s}  score = {score:.3f}")
+    print("Top Parks:")
+    for i, (park, score) in enumerate((result.ranked_parks or [])[:3], start=1):
+        print(f"{i}. {park}  (score={score:.3f})")
 
-    print("\nTop inferred biomes:")
-    for biome, score in result.biome_scores[:4]:
-        print(f"  - {biome:18s}  {score:.3f}")
+    print("\nTop Biomes:")
+    for i, (biome, score) in enumerate((result.biome_scores or [])[:3], start=1):
+        print(f"{i}. {biome}  (score={score:.3f})")
 
-    print("\nWhy this match (top contributing phrases):")
-    for park, _score in result.ranked_parks[:2]:
-        print(f"\n{park}:")
-        contribs = result.explanations.get(park, [])
-        if not contribs:
-            print("  (no strong contributors)")
-            continue
+    # --- Park connections (best park only) ---
+    print("\nWord Connections (Best Park):")
+    park_contribs = []
+    if getattr(result, "explanations", None):
+        park_contribs = result.explanations.get(result.best_park, [])
 
-        for c in contribs[:6]:
+    if not park_contribs:
+        print("(no strong contributors)")
+    else:
+        for c in park_contribs[:10]:
             print(
-                f"  • '{c.poem_unit}' ({c.poem_unit_type}) "
-                f"→ '{c.matched_park_unit}' "
-                f"[sim={c.similarity:.2f}, vote={c.gated_vote:.2f}]"
+                f"• '{c.poem_unit}' ({c.poem_unit_type}) → '{c.matched_park_unit}' "
+                f"[sim={c.similarity:.2f}, vote={c.vote:.2f}]"
+            )
+
+    # --- Biome connections (top biome only) ---
+    print("\nWord Connections (Best Biome):")
+    top_biome = result.biome_scores[0][0] if result.biome_scores else ""
+    biome_contribs = []
+    if getattr(result, "biome_explanations", None) and top_biome:
+        biome_contribs = result.biome_explanations.get(top_biome, [])
+
+    if not biome_contribs:
+        print("(no strong contributors)")
+    else:
+        for c in biome_contribs[:10]:
+            print(
+                f"• '{c.poem_unit}' ({c.poem_unit_type}) → '{c.matched_biome_unit}' "
+                f"[sim={c.similarity:.2f}]"
             )
 
 
 def main() -> None:
-    matcher = ParkMatcher(biome_alpha=3, vote_similarity_threshold=0.4, park_biome_mix_max=0.9, park_biome_mix_mean=0.1)
+    matcher = ParkMatcher()
 
     poem = read_poem_from_terminal()
     if not poem.strip():

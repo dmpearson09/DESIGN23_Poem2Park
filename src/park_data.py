@@ -1,15 +1,15 @@
 """
 park_data.py
 
-Hardcoded databases with:
+Hardcoded Database With:
 1) Park Biome Tags
-2) Park language profiles (terms + noun chunks)
-3) Biome language profiles (terms + noun chunks)
+2) Park language profiles (tokens + chunks)
+3) Biome language profiles (tokens + chunks)
 
 Notes:
 - Items lowercase.
-- Terms should be single words (no spaces).
-- Chunks should be multi-word phrases (contain spaces).
+- Tokens single words (no spaces).
+- Chunks multi-word phrases (contain spaces).
 """
 
 from __future__ import annotations
@@ -32,7 +32,7 @@ PARKS: Tuple[str, ...] = (
 )
 
 # -----------------------------
-# Biome Tags
+# Biomes
 # -----------------------------
 BIOMES: Tuple[str, ...] = (
     "Marine_Costal",
@@ -44,24 +44,24 @@ BIOMES: Tuple[str, ...] = (
     "Volcanic_Fire",
 )
 
-# --------------------------------------
+# -----------------------------
 # Park Biomes
-# --------------------------------------
+# -----------------------------
 PARK_BIOMES: Dict[str, List[str]] = {
     "Channel Islands": ["Marine_Costal"],
     "Death Valley": ["Dessert"],
     "Joshua Tree": ["Dessert"],
-    "Pinnacles": ["Dessert", "Meadows_Flowers"],
-    "Redwood": ["Forrest"],
-    "Sequoia": ["Forrest"],
+    "Pinnacles": ["Dessert"],
+    "Redwood": ["Forrest", "Meadows_Flowers"],
+    "Sequoia": ["Forrest", "Meadows_Flowers"],
     "Yosemite": ["Mountains_Hills", "Rivers_Lakes", "Meadows_Flowers"],
     "Kings Canyon": ["Mountains_Hills", "Rivers_Lakes"],
     "Lassen Volcanic": ["Mountains_Hills", "Volcanic_Fire"],
 }
 
-# ============================================================
-# 1) PARK LANGUAGE DATABASE
-# ============================================================
+# -----------------------------
+# Park Tokens Database
+# -----------------------------
 
 PARK_TERMS: Dict[str, List[str]] = {
     "Channel Islands": [
@@ -76,6 +76,8 @@ PARK_TERMS: Dict[str, List[str]] = {
         "shore",
         "harbor",
         "seal",
+        "wave",
+        "waves",
         "sea lion",
         "whale",
         "dolphin",
@@ -83,7 +85,6 @@ PARK_TERMS: Dict[str, List[str]] = {
         "pelican",
         "brine",
         "spray",
-        "cliff",
         "bluff",
         "cove",
         "anchorage",
@@ -120,7 +121,6 @@ PARK_TERMS: Dict[str, List[str]] = {
     ],
     "Joshua Tree": [
         "desert",
-        "cactus",
         "yucca",
         "joshua",
         "boulder",
@@ -133,18 +133,17 @@ PARK_TERMS: Dict[str, List[str]] = {
         "arid",
         "dry",
         "spine",
-        "thorn",
         "ocotillo",
         "cholla",
         "scrub",
         "ridge",
-        "hike",
         "climb",
         "sunrise",
         "twilight",
     ],
     "Kings Canyon": [
         "canyon",
+        "mountain"
         "river",
         "creek",
         "waterfall",
@@ -237,6 +236,8 @@ PARK_TERMS: Dict[str, List[str]] = {
         "mist",
         "coastal",
         "spruce",
+        "wood",
+        "woods",
     ],
     "Sequoia": [
         "sequoia",
@@ -259,6 +260,9 @@ PARK_TERMS: Dict[str, List[str]] = {
         "thin",
         "pine",
         "bear",
+        "wood",
+        "woods",
+        "woodland",
     ],
     "Yosemite": [
         "yosemite",
@@ -275,6 +279,7 @@ PARK_TERMS: Dict[str, List[str]] = {
         "fir",
         "meadow",
         "wildflower",
+        "mountain",
         "alpine",
         "snow",
         "peak",
@@ -286,9 +291,14 @@ PARK_TERMS: Dict[str, List[str]] = {
     ],
 }
 
+# -----------------------------
+# Park Chunks Database
+# -----------------------------
+
 PARK_CHUNKS: Dict[str, List[str]] = {
     "Channel Islands": [
         "kelp forest",
+        "large waves",
         "rocky shore",
         "sea cave",
         "tide pool",
@@ -311,12 +321,9 @@ PARK_CHUNKS: Dict[str, List[str]] = {
         "sun baked rock",
     ],
     "Joshua Tree": [
-        "joshua tree",
         "granite boulders",
         "desert night sky",
-        "cactus garden",
         "rocky wash",
-        "high desert",
         "hidden valley",
         "boulder field",
     ],
@@ -381,9 +388,9 @@ PARK_CHUNKS: Dict[str, List[str]] = {
     ],
 }
 
-# ============================================================
-# 2) BIOME LANGUAGE DATABASE
-# ============================================================
+# -----------------------------
+# Biome Tokens Database
+# -----------------------------
 
 BIOME_TERMS: Dict[str, List[str]] = {
     "Marine_Costal": [
@@ -408,15 +415,19 @@ BIOME_TERMS: Dict[str, List[str]] = {
         "cove",
     ],
     "Dessert": [
+        "scourching",
+        "sun",
+        "mirage",
+        "dust",
+        "rattlesnake",
         "desert",
+        "hot",
         "arid",
         "dry",
         "dune",
         "sand",
-        "cactus",
         "yucca",
         "heat",
-        "sun",
         "mirage",
         "barren",
         "scrub",
@@ -504,6 +515,10 @@ BIOME_TERMS: Dict[str, List[str]] = {
     ],
 }
 
+# -----------------------------
+# Biome Chunks Database
+# -----------------------------
+
 BIOME_CHUNKS: Dict[str, List[str]] = {
     "Marine_Costal": [
         "kelp forest",
@@ -518,7 +533,7 @@ BIOME_CHUNKS: Dict[str, List[str]] = {
         "sand dunes",
         "salt flats",
         "dry lakebed",
-        "high desert",
+        "hot flats",
         "sun baked rock",
         "arid basin",
     ],

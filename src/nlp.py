@@ -6,8 +6,9 @@ SpaCy-Powered Text Processing for Poem2Park.
 Main Logic Flow:
 - Load a spaCy model
 - Extract "units" from text:
-  - tokens: NOUN/PROPN/ADJ/VERB (minus stopwords, punctuation, etc.)
-  - chunks: cleaned noun chunks (multi-word only)
+  - Tokens: NOUN/PROPN/ADJ/VERB (single word)
+  - Chunks: Noun Chunks (multi-word)
+  - Clean and Filter tokens and chunks
 - Vectorize units
 """
 
@@ -32,18 +33,17 @@ from spacy.tokens import Doc, Token
 @dataclass(frozen=True)
 class Units:
     """Extracted units from a text."""
-    tokens: Tuple[str, ...]           # single-word units (lemmas)
-    chunks: Tuple[str, ...]           # multi-word noun chunks
-    debug: Dict[str, object]          # debug info (lightweight)
+    tokens: Tuple[str, ...]           # single-word tokens
+    chunks: Tuple[str, ...]           # multi-word chunks
+    debug: Dict[str, object]          # Debug info
 
 
 @dataclass(frozen=True)
 class VectorUnit:
-    """A unit paired with a vector and a weight for scoring."""
+    """A unit paired with a vector."""
     text: str                        # extracted text
-    unit_type: str                   # "token" or "chunk"
+    unit_type: str                   # token or chunk
     vector: Sequence[float]          # spaCy vector
-    weight: float                    # weight for scoring
 
 
 # -----------------------------
@@ -52,12 +52,8 @@ class VectorUnit:
 
 DEFAULT_MODEL_NAME = "en_core_web_md"
 
-# POS tags for single-token extraction
+# POS tags for token extraction
 ALLOWED_POS: Set[str] = {"NOUN", "PROPN", "ADJ", "VERB"}
-
-# Defaults for weighting in voting (you said only these should remain)
-DEFAULT_TOKEN_WEIGHT = 1.5
-DEFAULT_CHUNK_WEIGHT = 1.5
 
 
 # -----------------------------
@@ -217,16 +213,9 @@ def extract_units(
 def vectorize_units(
     units: Units,
     nlp: Optional[Language] = None,
-    *,
-    token_weight: float = DEFAULT_TOKEN_WEIGHT,
-    chunk_weight: float = DEFAULT_CHUNK_WEIGHT,
 ) -> List[VectorUnit]:
     """
     Convert extracted Units into VectorUnits with spaCy vectors.
-
-    Differences from earlier version:
-    - No proper noun boosting (PROPN treated the same as any token)
-    - Only token_weight and chunk_weight control voting weight
     """
     if nlp is None:
         nlp = load_model()
@@ -243,7 +232,6 @@ def vectorize_units(
                 text=ch,
                 unit_type="chunk",
                 vector=doc.vector,
-                weight=chunk_weight,
             )
         )
 
@@ -257,7 +245,6 @@ def vectorize_units(
                 text=tok,
                 unit_type="token",
                 vector=doc.vector,
-                weight=token_weight,
             )
         )
 

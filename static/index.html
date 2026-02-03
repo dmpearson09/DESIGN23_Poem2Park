@@ -2,239 +2,593 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Poem2Park</title>
-
   <style>
+    :root {
+      --bg: #ffffff;
+      --card: #ffffff;
+      --muted: #6b7280;
+      --text: #111827;
+      --border: #e5e7eb;
+
+      --green-bg: #dcfce7;
+      --green: #166534;
+
+      --yellow-bg: #fef9c3;
+      --yellow: #854d0e;
+
+      --btn: #111827;
+      --btn2: #f3f4f6;
+      --shadow: rgba(17, 24, 39, 0.08);
+    }
+
     body {
-      font-family: system-ui, -apple-system, sans-serif;
-      max-width: 860px;
-      margin: 40px auto;
-      padding: 0 16px;
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      background: var(--bg);
+      color: var(--text);
     }
 
-    textarea {
-      width: 100%;
-      height: 220px;
-      font-size: 16px;
-      padding: 10px;
-      box-sizing: border-box;
+    /* Single-column, centered layout */
+    .wrap {
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 28px 16px 48px;
+      display: block;
     }
 
-    button {
-      margin-top: 10px;
-      padding: 10px 16px;
-      font-size: 16px;
-      cursor: pointer;
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      box-shadow: 0 10px 24px var(--shadow);
+      padding: 18px;
+      margin-bottom: 16px;
     }
 
     h1 {
-      margin-bottom: 6px;
+      margin: 0 0 8px 0;
+      font-size: 28px;
+      letter-spacing: 0.2px;
     }
 
     h2 {
-      margin-bottom: 6px;
+      margin: 18px 0 10px 0;
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
     }
 
-    .section {
-      margin-top: 26px;
+    .row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
     }
 
-    .box {
-      background: #f6f6f6;
+    .btn {
+      border: 1px solid rgba(0,0,0,.12);
+      background: var(--btn);
+      color: white;
+      padding: 10px 14px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 650;
+      letter-spacing: .2px;
+    }
+    .btn.secondary {
+      background: var(--btn2);
+      color: var(--text);
+    }
+    .btn:disabled {
+      opacity: .6;
+      cursor: not-allowed;
+    }
+
+    .help {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+      margin-top: 10px;
+    }
+
+    /* Highlightable "textbox" */
+    .editor {
+      border: 1px solid var(--border);
       border-radius: 12px;
-      padding: 14px;
-      margin-top: 8px;
+      padding: 12px;
+      min-height: 200px;
+      background: #ffffff;
+      color: #111827;
+      outline: none;
+      white-space: pre-wrap;
+      line-height: 1.2;
+      font-size: 15px;
+    }
+    .editor:focus {
+      border-color: #9ca3af;
+      box-shadow: 0 0 0 3px rgba(17,24,39,.08);
+    }
+    .editor:empty:before {
+      content: attr(data-placeholder);
+      color: rgba(107, 114, 128, 0.8);
     }
 
-    ol {
-      margin: 6px 0 0 22px;
+    /* highlights */
+    .hl-park {
+      background: var(--green-bg);
+      color: var(--green);
+      border-radius: 6px;
+      padding: 0 4px;
+      box-decoration-break: clone;
+      -webkit-box-decoration-break: clone;
+    }
+    .hl-biome {
+      background: var(--yellow-bg);
+      color: var(--yellow);
+      border-radius: 6px;
+      padding: 0 4px;
+      box-decoration-break: clone;
+      -webkit-box-decoration-break: clone;
     }
 
     .muted {
-      color: #666;
-      font-size: 14px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
     }
 
-    .poem {
-      white-space: pre-wrap;
-      line-height: 1.5;
-      font-size: 15px;
+    .list {
+      margin: 0;
+      padding-left: 18px;
+    }
+    .list li { margin: 6px 0; }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--border);
+      background: #ffffff;
+      padding: 7px 10px;
+      border-radius: 999px;
+      font-size: 13px;
+      color: var(--muted);
     }
 
-    .hl {
-      background: #c9f3c9;
-      border-radius: 4px;
-      padding: 1px 3px;
+    .result-title {
+      font-size: 22px;
+      font-weight: 800;
+      margin: 0;
+    }
+
+    .park-image {
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+      margin-top: 12px;
+      background: #ffffff;
+    }
+    .park-image img {
+      width: 100%;
+      height: auto;
+      display: block;
     }
 
     .conn {
-      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      font-size: 13px;
-      line-height: 1.4;
-      white-space: pre-wrap;
+      margin-top: 12px;
+      border-top: 1px solid var(--border);
+      padding-top: 12px;
     }
 
-    #parkTitle {
-      margin-top: 22px;
-      margin-bottom: 6px;
-      text-align: center;
-      font-size: 26px;
-      font-weight: 500;
-      letter-spacing: 0.08em;
-      display: none;
+    .conn-item {
+      margin: 8px 0;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+    .conn-item code {
+      background: #f3f4f6;
+      border: 1px solid #e5e7eb;
+      padding: 2px 6px;
+      border-radius: 8px;
+      color: #111827;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 12.5px;
     }
 
-    #parkImg {
-      width: 100%;
-      max-height: 360px;
-      object-fit: cover;
+    .error {
+      color: #7f1d1d;
+      background: #fee2e2;
+      border: 1px solid #fecaca;
+      padding: 10px 12px;
       border-radius: 12px;
+      margin-top: 10px;
       display: none;
-      margin-top: 6px;
     }
+
+    /* Simple single-column results layout (no grid) */
+    .grid2 {
+      display: block;
+    }
+
+    /* Small spacing helpers */
+    .spacer-12 { height: 12px; }
+    .spacer-10 { height: 10px; }
   </style>
 </head>
 
 <body>
-  <h1>Poem2Park</h1>
-  <p class="muted">
-    Paste a poem to see which California national park it most resembles.
-  </p>
+  <div class="wrap">
+    <!-- Input -->
+    <div class="card">
+      <h1>Poem2Park</h1>
+      <div class="muted">Paste a Poem to match it to a California National Park.</div>
 
-  <textarea id="poem" placeholder="Paste your poem here..."></textarea>
-  <br>
-  <button id="go">Match</button>
+      <div class="muted" style="margin-top: 10px;">
+        <span style="font-weight: 700; color: var(--text);">Inspiration:</span>
+        <a href="https://pinetreepoet.com/mountain-poems/" target="_blank" rel="noopener noreferrer">Mountain Poems</a> |
+        <a href="https://www.familyfriendpoems.com/poems/nature/ocean/#google_vignette" target="_blank" rel="noopener noreferrer">Ocean Poems</a> |
+        <a href="https://transactionswithbeauty.com/home/10poemsaboutflowers" target="_blank" rel="noopener noreferrer">Flower Poems</a> |
+        <a href="https://medium.com/@erikdotrumpet/33-poems-about-the-desert-e6e2d3670c0c" target="_blank" rel="noopener noreferrer">Desert Poems</a> |
+        <a href="https://interestingliterature.com/2017/03/10-of-the-best-poems-about-forests-and-trees/" target="_blank" rel="noopener noreferrer">Forest Poems</a>
+      </div>
 
-  <!-- Park title + image -->
-  <h2 id="parkTitle"></h2>
-  <img id="parkImg" src="" alt="">
+      <div style="height: 12px;"></div>
 
-  <!-- Results -->
-  <div id="out" style="display:none;"></div>
+      <h2>Poem input</h2>
+      <div id="editor"
+           class="editor"
+           contenteditable="true"
+           data-placeholder="type your poem here..."></div>
 
-  <!-- ===================== -->
-  <!-- JavaScript logic -->
-  <!-- ===================== -->
-  <script>
-    const out = document.getElementById("out");
-    const poemBox = document.getElementById("poem");
-    const img = document.getElementById("parkImg");
-    const title = document.getElementById("parkTitle");
+      <div style="height: 12px;"></div>
 
-    function esc(s) {
-      return (s ?? "").toString()
-        .replaceAll("&","&amp;")
-        .replaceAll("<","&lt;")
-        .replaceAll(">","&gt;");
+      <div class="row">
+        <button id="btnMatch" class="btn">Match Poem</button>
+        <button id="btnClear" class="btn secondary">Clear</button>
+      </div>
+
+      <div id="errorBox" class="error"></div>
+
+      <div class="help">
+        <div><span class="hl-park">Green</span> = phrases contributing to the <b>best park</b>.</div>
+        <div><span class="hl-biome">Yellow</span> = phrases contributing to the <b>top biome</b>.</div>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div class="card">
+      <h2>Results</h2>
+      <p id="bestTitle" class="result-title">Best Match: —</p>
+
+      <div class="park-image" id="parkImageWrap" style="display:none;">
+        <img id="parkImage" alt="Selected park image" />
+      </div>
+
+      <div style="height: 10px;"></div>
+    </div>
+
+    <div class="card">
+      <h2>Details</h2>
+
+
+
+      <div class="conn">
+        <h2>Top parks</h2>
+        <ol id="parksList" class="list"></ol>
+      </div>
+
+      <div class="conn">
+        <h2>Top biomes</h2>
+        <ol id="biomesList" class="list"></ol>
+      </div>
+
+      <div class="conn">
+        <h2>Word Connections (Best Park)</h2>
+        <div id="parkConn"></div>
+      </div>
+
+      <div class="conn">
+        <h2>Word Connections (Best Biome)</h2>
+        <div id="biomeConn"></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // -----------------------------
+  // Helpers: safe text + highlighting
+  // -----------------------------
+
+  function escapeHtml(str) {
+    return str
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  // Escape for regex construction
+  function escapeRegex(str) {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  }
+
+  // Get plain text from the editor (contenteditable)
+  function getEditorText() {
+    // innerText preserves newlines; good for poems
+    return document.getElementById("editor").innerText || "";
+  }
+
+  // Set editor with *highlighted HTML* based on park + biome phrases.
+  // We'll:
+  // 1) Escape HTML
+  // 2) Replace phrases longest-first
+  // 3) Mark best-park phrases as green
+  // 4) Mark top-biome phrases as yellow
+  //
+  // If a phrase is in BOTH sets, we prefer park-green.
+  function setEditorHighlighted(rawText, parkPhrases, biomePhrases) {
+    const editor = document.getElementById("editor");
+
+    // Normalize phrases (lowercase) for overlap logic, but keep original matching case-insensitive.
+    const parkSet = new Set((parkPhrases || []).map(p => p.trim()).filter(Boolean));
+    const biomeSet = new Set((biomePhrases || []).map(p => p.trim()).filter(Boolean));
+
+    // Remove overlaps from biome so park wins
+    for (const p of parkSet) {
+      if (biomeSet.has(p)) biomeSet.delete(p);
     }
 
-    function fmt(n) {
-      return Number(n).toFixed(3);
-    }
+    // Sort phrases longest-first so we highlight multi-word chunks before single tokens
+    const parkSorted = Array.from(parkSet).sort((a,b) => b.length - a.length);
+    const biomeSorted = Array.from(biomeSet).sort((a,b) => b.length - a.length);
 
-    function highlightPoem(poem, phrases) {
-      let html = esc(poem);
+    // Work on escaped HTML
+    let html = escapeHtml(rawText);
 
-      phrases
-        .sort((a, b) => b.length - a.length)
-        .forEach(p => {
-          const safe = p.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-          const re = new RegExp(`\\b(${safe})\\b`, "gi");
-          html = html.replace(re, `<span class="hl">$1</span>`);
-        });
+    // Helper to wrap matches while preserving original text
+    // We match with "word boundary-ish" rules:
+    // - For multi-word phrases, we just match the phrase text
+    // - For single words, we use \b word boundaries
+    function wrapPhrases(inputHtml, phrases, cls) {
+      let out = inputHtml;
 
-      return html;
-    }
+      for (const phrase of phrases) {
+        if (!phrase) continue;
 
-    document.getElementById("go").addEventListener("click", async () => {
-      const poem = poemBox.value.trim();
-      if (!poem) return;
+        const isSingleWord = !phrase.includes(" ");
+        const pattern = isSingleWord
+          ? `\\b${escapeRegex(phrase)}\\b`
+          : escapeRegex(phrase);
 
-      out.style.display = "block";
-      out.innerHTML = "<div class='box'>Running…</div>";
+        const re = new RegExp(pattern, "gi");
 
-      title.style.display = "none";
-      img.style.display = "none";
-
-      try {
-        const res = await fetch("/match", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ poem })
-        });
-
-        const data = await res.json();
-
-        if (data.error) {
-          out.innerHTML = `<div class="box"><b>Error:</b> ${esc(data.error)}</div>`;
-          return;
-        }
-
-        /* ---------- TITLE + IMAGE ---------- */
-        if (data.image_url) {
-          title.textContent = `${data.best_park.toUpperCase()} NATIONAL PARK`;
-          title.style.display = "block";
-
-          img.src = data.image_url;
-          img.alt = data.best_park;
-          img.style.display = "block";
-        }
-
-        /* ---------- DATA ---------- */
-        const parks = data.ranked_parks || [];
-        const biomes = data.biomes || [];
-        const bestPark = data.best_park;
-        const connections = (data.explanations || {})[bestPark] || [];
-
-        const phrases = connections.map(c => c.poem_unit.toLowerCase());
-
-        const parkList = parks.map(
-          ([p, s]) => `<li>${esc(p)} (${fmt(s)})</li>`
-        ).join("");
-
-        const biomeList = biomes.map(
-          ([b, s]) => `<li>${esc(b)} (${fmt(s)})</li>`
-        ).join("");
-
-        const highlightedPoem = highlightPoem(poem, phrases);
-
-        const connText = connections.map(c =>
-          `${c.poem_unit} (${c.poem_unit_type}) → ${c.matched_park_unit} ` +
-          `[sim=${Number(c.similarity).toFixed(2)}, vote=${Number(c.gated_vote).toFixed(2)}]`
-        ).join("\n");
-
-        /* ---------- RENDER ---------- */
-        out.innerHTML = `
-          <div class="section">
-            <h2>Best Match:</h2>
-            <div class="box">
-              <ol>${parkList || "<li>(none)</li>"}</ol>
-            </div>
-          </div>
-
-          <div class="section">
-            <h2>Top Biomes:</h2>
-            <div class="box">
-              <ol>${biomeList || "<li>(none)</li>"}</ol>
-            </div>
-          </div>
-
-          <div class="section">
-            <h2>Highlighted Poem (Contributing Words)</h2>
-            <div class="box poem">${highlightedPoem}</div>
-          </div>
-
-          <div class="section">
-            <h2>Word Connections (Best Park):</h2>
-            <div class="box conn">
-              ${esc(connText || "(no strong connections)")}
-            </div>
-          </div>
-        `;
-      } catch (e) {
-        out.innerHTML = `<div class="box"><b>Request failed:</b> ${esc(e)}</div>`;
+        // Wrap matched substring; keep actual matched casing from the text
+        out = out.replace(re, (m) => `<span class="${cls}">${m}</span>`);
       }
-    });
-  </script>
+      return out;
+    }
+
+    // Apply highlights (park first, then biome)
+    html = wrapPhrases(html, parkSorted, "hl-park");
+    html = wrapPhrases(html, biomeSorted, "hl-biome");
+
+    // Preserve line breaks
+    html = html.replace(/\n/g, "<br>");
+
+    editor.innerHTML = html;
+    placeCaretAtEnd(editor);
+  }
+
+  function placeCaretAtEnd(el) {
+    // Keep cursor at end after highlighting to avoid weird UX
+    el.focus();
+    if (typeof window.getSelection !== "undefined" && typeof document.createRange !== "undefined") {
+      const range = document.createRange();
+      range.selectNodeContents(el);
+      range.collapse(false);
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+    }
+  }
+
+  // -----------------------------
+  // Render results
+  // -----------------------------
+
+  function showError(msg) {
+    const box = document.getElementById("errorBox");
+    box.style.display = "block";
+    box.innerText = msg;
+  }
+
+  function clearError() {
+    const box = document.getElementById("errorBox");
+    box.style.display = "none";
+    box.innerText = "";
+  }
+
+  function renderTopList(elId, items) {
+    const el = document.getElementById(elId);
+    el.innerHTML = "";
+    const top = (items || []).slice(0, 3);
+    for (const [name, score] of top) {
+      const li = document.createElement("li");
+      li.innerText = `${name}  (score: ${Number(score).toFixed(3)})`;
+      el.appendChild(li);
+    }
+  }
+
+  function renderConnections(containerId, rows, kind) {
+    // kind: "park" or "biome" (changes arrow label field)
+    const el = document.getElementById(containerId);
+    el.innerHTML = "";
+
+    if (!rows || rows.length === 0) {
+      el.innerHTML = `<div class="muted">(no strong contributors)</div>`;
+      return;
+    }
+
+    for (const c of rows) {
+      const div = document.createElement("div");
+      div.className = "conn-item";
+
+      if (kind === "park") {
+        div.innerHTML =
+          `• <code>${escapeHtml(c.poem_unit)}</code> (${escapeHtml(c.poem_unit_type)}) ` +
+          `→ <code>${escapeHtml(c.matched_park_unit)}</code> ` +
+          `<span class="muted">[sim=${Number(c.similarity).toFixed(2)}, vote=${Number(c.vote).toFixed(2)}]</span>`;
+      } else {
+        div.innerHTML =
+          `• <code>${escapeHtml(c.poem_unit)}</code> (${escapeHtml(c.poem_unit_type)}) ` +
+          `→ <code>${escapeHtml(c.matched_biome_unit)}</code> ` +
+          `<span class="muted">[sim=${Number(c.similarity).toFixed(2)}]</span>`;
+      }
+
+      el.appendChild(div);
+    }
+  }
+
+  // -----------------------------
+  // Main
+  // -----------------------------
+
+  const btnMatch = document.getElementById("btnMatch");
+  const btnClear = document.getElementById("btnClear");
+
+  const editorEl = document.getElementById("editor");
+
+  // Force plain-text paste into the contenteditable editor.
+  // This prevents colored text/backgrounds/fonts from being pasted in.
+  // Line breaks are preserved because we insert the raw text with \n and the editor uses white-space: pre-wrap.
+  editorEl.addEventListener("paste", (e) => {
+    e.preventDefault();
+
+    const text = (e.clipboardData || window.clipboardData).getData("text/plain");
+
+    // Prefer execCommand when available (keeps undo stack nice in many browsers)
+    if (document.queryCommandSupported && document.queryCommandSupported("insertText")) {
+      document.execCommand("insertText", false, text);
+      return;
+    }
+
+    // Fallback: insert at caret using Range APIs
+    const sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0) {
+      editorEl.innerText += text;
+      return;
+    }
+
+    const range = sel.getRangeAt(0);
+    range.deleteContents();
+    range.insertNode(document.createTextNode(text));
+
+    // Move caret to end of inserted text
+    range.collapse(false);
+    sel.removeAllRanges();
+    sel.addRange(range);
+  });
+
+  // Optional: also prevent rich-text drop from carrying styles
+  editorEl.addEventListener("drop", (e) => {
+    e.preventDefault();
+    const text = e.dataTransfer ? e.dataTransfer.getData("text/plain") : "";
+    if (text) {
+      if (document.queryCommandSupported && document.queryCommandSupported("insertText")) {
+        document.execCommand("insertText", false, text);
+      } else {
+        editorEl.innerText += text;
+      }
+    }
+  });
+
+  btnClear.addEventListener("click", () => {
+    clearError();
+    document.getElementById("editor").innerHTML = "";
+    document.getElementById("bestTitle").innerText = "Best Match: —";
+    document.getElementById("parksList").innerHTML = "";
+    document.getElementById("biomesList").innerHTML = "";
+    document.getElementById("parkConn").innerHTML = "";
+    document.getElementById("biomeConn").innerHTML = "";
+    document.getElementById("parkImageWrap").style.display = "none";
+  });
+
+  btnMatch.addEventListener("click", async () => {
+    clearError();
+    btnMatch.disabled = true;
+
+    const poem = getEditorText().trim();
+    if (!poem) {
+      showError("Please paste a poem first.");
+      btnMatch.disabled = false;
+      return;
+    }
+
+    try {
+      const res = await fetch("/match", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ poem })
+      });
+
+      const data = await res.json();
+
+      if (data.error) {
+        showError(data.error);
+        btnMatch.disabled = false;
+        return;
+      }
+
+      // 1) Title + image
+      const bestPark = data.best_park || "Unknown";
+      document.getElementById("bestTitle").innerText = `Best Match: ${bestPark}`;
+
+      const imgUrl = data.image_url || "";
+      const imgWrap = document.getElementById("parkImageWrap");
+      const img = document.getElementById("parkImage");
+      if (imgUrl) {
+        img.src = imgUrl;
+        imgWrap.style.display = "block";
+      } else {
+        imgWrap.style.display = "none";
+      }
+
+      // 2) Lists
+      renderTopList("parksList", data.ranked_parks || []);
+      renderTopList("biomesList", data.biomes || []);
+
+      // 3) Connections (best park)
+      const parkConnAll = data.explanations || {};
+      const parkConnRows = parkConnAll[bestPark] || [];
+      renderConnections("parkConn", parkConnRows, "park");
+
+      // 4) Connections (top biome)
+      const topBiome = (data.biomes && data.biomes[0] && data.biomes[0][0]) ? data.biomes[0][0] : "";
+      const biomeConnAll = data.biome_explanations || {};
+      const biomeConnRows = topBiome ? (biomeConnAll[topBiome] || []) : [];
+      renderConnections("biomeConn", biomeConnRows, "biome");
+
+      // 5) Highlight phrases in the poem:
+      // - Best park contributors => green
+      // - Top biome contributors => yellow
+      const parkPhrases = (parkConnRows || []).map(c => c.poem_unit).filter(Boolean);
+      const biomePhrases = (biomeConnRows || []).map(c => c.poem_unit).filter(Boolean);
+
+      setEditorHighlighted(poem, parkPhrases, biomePhrases);
+
+    } catch (err) {
+      console.error(err);
+      showError("Something went wrong calling /match. Check the server logs.");
+    } finally {
+      btnMatch.disabled = false;
+    }
+  });
+</script>
 </body>
 </html>
