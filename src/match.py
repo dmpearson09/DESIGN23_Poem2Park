@@ -63,10 +63,11 @@ class MatchResult:
 
 
 # -----------------------------
-# Similarity helpers
+# Similarity Helpers
 # -----------------------------
 
 def _safe_norm(x: np.ndarray) -> float:
+    # Compute vector norm
     return float(np.linalg.norm(x))
 
 
@@ -96,7 +97,7 @@ def _topk_mean(scores: List[float], k: int) -> float:
 
 
 # -----------------------------
-# ParkMatcher (Main Class)
+# ParkMatcher
 # -----------------------------
 
 class ParkMatcher:
@@ -152,7 +153,7 @@ class ParkMatcher:
         self._build_biome_vectors_and_prototypes()
 
     # -----------------------------
-    # Build steps
+    # Build Steps
     # -----------------------------
 
     def _build_reverse_biome_index(self) -> None:
@@ -221,7 +222,7 @@ class ParkMatcher:
             self._biome_proto_norms[biome] = _safe_norm(proto)
 
     # -----------------------------
-    # Runtime: public API
+    # Runtime
     # -----------------------------
 
     def match(self, poem_text: str) -> MatchResult:
@@ -263,7 +264,7 @@ class ParkMatcher:
         )
 
     # -----------------------------
-    # Runtime: internal helpers
+    # Internal Runtime Helpers
     # -----------------------------
 
     def _poem_vector_units(self, poem_text: str) -> List[VectorUnit]:

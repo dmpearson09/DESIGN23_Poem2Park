@@ -27,7 +27,7 @@ from spacy.tokens import Doc, Token
 
 
 # -----------------------------
-# Data structures
+# Data Structures
 # -----------------------------
 
 @dataclass(frozen=True)
@@ -47,17 +47,17 @@ class VectorUnit:
 
 
 # -----------------------------
-# Configuration defaults
+# Configuration Defaults
 # -----------------------------
 
 DEFAULT_MODEL_NAME = "en_core_web_md"
 
-# POS tags for token extraction
+# Word Tags for Token Extraction
 ALLOWED_POS: Set[str] = {"NOUN", "PROPN", "ADJ", "VERB"}
 
 
 # -----------------------------
-# Model loading
+# Model Loading
 # -----------------------------
 
 _NLP_SINGLETON: Optional[Language] = None
@@ -66,13 +66,12 @@ _NLP_SINGLETON: Optional[Language] = None
 def load_model(model_name: str = DEFAULT_MODEL_NAME) -> Language:
     """
     Load and cache a spaCy model.
-    Raises a helpful error if the model isn't installed.
     """
     global _NLP_SINGLETON
     if _NLP_SINGLETON is not None:
         return _NLP_SINGLETON
-
-    try:
+    # error handling
+    try:                    
         nlp = spacy.load(model_name)
     except OSError as e:
         raise OSError(
@@ -127,7 +126,7 @@ def _filter_chunk(doc: Doc, start: int, end: int) -> bool:
 
 
 # -----------------------------
-# Public API: extract units
+# Extract Units
 # -----------------------------
 
 def extract_units(
@@ -140,11 +139,6 @@ def extract_units(
 ) -> Units:
     """
     Extract tokens and noun chunks from the input text.
-
-    Differences from earlier version:
-    - No generic filter
-    - No deduplication
-    - No PROPN flags
     """
     if nlp is None:
         nlp = load_model()
@@ -158,7 +152,7 @@ def extract_units(
         "empty_lemma": 0,
     }
 
-    # --- Tokens (single word units) ---
+    # Tokens (single word units)
     for t in doc:
         if _is_noise_token(t):
             removed_counts["stop_or_noise"] += 1
@@ -177,7 +171,7 @@ def extract_units(
         if max_tokens is not None and len(tokens_out) >= max_tokens:
             break
 
-    # --- Noun chunks (multi-word units) ---
+    # Chunks (multi-word units)
     chunks_out: List[str] = []
     try:
         for chunk in doc.noun_chunks:
@@ -207,7 +201,7 @@ def extract_units(
 
 
 # -----------------------------
-# Public API: vectorize units
+# Vectorize Units
 # -----------------------------
 
 def vectorize_units(
@@ -222,7 +216,7 @@ def vectorize_units(
 
     vec_units: List[VectorUnit] = []
 
-    # --- Chunks ---
+    # Chunks
     for ch in units.chunks:
         doc = nlp(ch)
         if not _has_nonzero_vector(doc.vector):
@@ -235,7 +229,7 @@ def vectorize_units(
             )
         )
 
-    # --- Tokens ---
+    # Tokens
     for tok in units.tokens:
         doc = nlp(tok)
         if not _has_nonzero_vector(doc.vector):
